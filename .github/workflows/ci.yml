@@ -42,6 +42,11 @@ jobs:
         lcov --ignore-errors inconsistent,unused,mismatch,missing,source,empty,gcov --capture --directory nimcache --output-file coverage.info || true
         lcov --ignore-errors inconsistent,unused,mismatch,missing,source,empty,gcov --remove coverage.info '*/lib/*' --output-file coverage.info || true
 
+    - name: Generate HTML Documentation
+      run: |
+        export PATH=$HOME/.nimble/bin:$PATH
+        nimble docs
+
     - name: Generate Coverage Badge
       run: |
         touch coverage.info
@@ -56,11 +61,6 @@ jobs:
         mkdir -p docs
         touch docs/.nojekyll
         curl -s -o docs/coverage.svg "https://img.shields.io/badge/Coverage-${coverage_pct}%25-${color}"
-
-    - name: Generate HTML Documentation
-      run: |
-        export PATH=$HOME/.nimble/bin:$PATH
-        nimble docs
 
     - name: Commit Badge and Documentation
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'

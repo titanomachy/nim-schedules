@@ -5,7 +5,7 @@
 
 A Nim scheduler library that lets you kick off jobs at regular intervals.
 
-Read the [documentation](https://titanomachy.github.io/nim-schedules/) online or read the [documentation](docs/schedules.html) locally.
+Read the documentation [online](https://titanomachy.github.io/nim-schedules/schedules.html) or [locally](docs/schedules.html).
 
 Features:
 
