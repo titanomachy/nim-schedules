@@ -1,7 +1,7 @@
 # nim-schedules
 
 [![CI](https://github.com/titanomachy/nim-schedules/actions/workflows/ci.yml/badge.svg)](https://github.com/titanomachy/nim-schedules/actions/workflows/ci.yml)
-[![Coverage](docs/coverage.svg)](https://titanomachy.github.io/nim-schedules/schedules.html)
+[![Coverage](https://titanomachy.github.io/nim-schedules/docs/coverage.svg)](https://github.com/titanomachy/nim-schedules/actions)
 
 A Nim scheduler library that lets you kick off jobs at regular intervals.
 
@@ -16,7 +16,7 @@ Features:
 ## Getting Started
 
 ```bash
-$ nimble install schedules
+$ nimble install https://github.com/titanomachy/nim-schedules
 ```
 
 ## Usage
