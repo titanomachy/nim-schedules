@@ -20,7 +20,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get remove -y lcov || true
-        sudo apt-get install -y libperlio-gzip-perl libjson-pp-perl
+        sudo apt-get install -y libperlio-gzip-perl libjson-pp-perl libcapture-tiny-perl libdatetime-perl
         wget https://github.com/linux-test-project/lcov/releases/download/v2.1/lcov-2.1.tar.gz
         tar -xzf lcov-2.1.tar.gz
         cd lcov-2.1
