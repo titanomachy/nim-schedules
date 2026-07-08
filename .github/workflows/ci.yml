@@ -16,7 +16,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y lcov
+        sudo apt-get install -y libperlio-gzip-perl libjson-pp-perl
+        wget https://github.com/linux-test-project/lcov/releases/download/v2.1/lcov-2.1.tar.gz
+        tar -xzf lcov-2.1.tar.gz
+        cd lcov-2.1
+        sudo make install
 
     - name: Install Nim
       run: |
@@ -31,13 +35,8 @@ jobs:
 
     - name: Capture Coverage Report
       run: |
-        if lcov --help | grep -q "ignore-errors"; then
-          lcov --ignore-errors inconsistent --capture --directory nimcache --output-file coverage.info
-          lcov --ignore-errors inconsistent --remove coverage.info '*/lib/*' --output-file coverage.info
-        else
-          lcov --capture --directory nimcache --output-file coverage.info
-          lcov --remove coverage.info '*/lib/*' --output-file coverage.info
-        fi
+        lcov --ignore-errors inconsistent,unused --capture --directory nimcache --output-file coverage.info
+        lcov --ignore-errors inconsistent,unused --remove coverage.info '*/lib/*' --output-file coverage.info
 
     - name: Generate Coverage Badge
       run: |
