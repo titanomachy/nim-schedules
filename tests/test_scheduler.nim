@@ -1,6 +1,6 @@
 import unittest
 
-import os, times, options, asyncdispatch
+import times, options, asyncdispatch
 import schedules
 
 

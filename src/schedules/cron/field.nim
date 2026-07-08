@@ -1,7 +1,5 @@
-from options import Option, some, none
 import times
 import ./expr
-import ./parser
 
 type
   FieldKind* = enum

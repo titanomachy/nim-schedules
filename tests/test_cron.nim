@@ -390,3 +390,30 @@ test "5 4 1 * sun":
     "2000-02-29 12:00:00",
     "2000-03-01 04:05:00",
   )
+
+test "5 4 * * 1#3 (3rd Monday)":
+  let cron = newCron(minute="5", hour="4", day_of_week="1#3")
+  # First Monday of Jan 2000 is Jan 3rd. 3rd is Jan 17th.
+  cron.checkCron(
+    "2000-01-01 00:00:00",
+    "2000-01-17 04:05:00",
+  )
+  # From Jan 18th, the next 3rd Monday is Feb 21st (first Monday of Feb 2000 is Feb 7th).
+  cron.checkCron(
+    "2000-01-18 00:00:00",
+    "2000-02-21 04:05:00",
+  )
+
+test "5 4 * * 5L (last Friday)":
+  let cron = newCron(minute="5", hour="4", day_of_week="5L")
+  # Last Friday of Jan 2000 is Jan 28th.
+  cron.checkCron(
+    "2000-01-01 00:00:00",
+    "2000-01-28 04:05:00",
+  )
+  # From Jan 29th, the next last Friday is Feb 25th.
+  cron.checkCron(
+    "2000-01-29 00:00:00",
+    "2000-02-25 04:05:00",
+  )
+

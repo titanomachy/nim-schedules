@@ -46,14 +46,6 @@ proc parseWeekday(s: string): int =
   else:
     idx + 1
 
-proc parseNonSeq(s: string): Expr =
-  if s == "":
-    raise newException(
-      ValueError,
-      fmt"{s}"
-    )
-  newAllExpr()
-
 proc parseAll(s: string): Expr =
   if s == "*":
     newAllExpr()

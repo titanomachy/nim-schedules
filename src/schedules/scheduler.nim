@@ -12,7 +12,7 @@
 ##         echo("sync tick ", now())
 ##
 
-import macros, macrocache, options, times, asyncdispatch, tables, sequtils, logging
+import macros, options, times, asyncdispatch, sequtils, logging
 
 from ./cron/cron import Cron, newCron, getNext
 
@@ -476,7 +476,7 @@ proc schedulerEx(sched: NimNode, body: NimNode): NimNode =
       `sched`.register(`beaterNode`)
     )
 
-macro scheduler*(sched: untyped, body: untyped): typed =
+macro scheduler*(sched: untyped, body: untyped) =
   ## Initialize a scheduler and register code blocks as beats.
   ##
   ## You'll use it when you want to mix using nim-schedules

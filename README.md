@@ -1,8 +1,11 @@
 # nim-schedules
 
+[![CI](https://github.com/<your-github-username>/nim-schedules/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-github-username>/nim-schedules/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/<your-github-username>/nim-schedules/branch/master/graph/badge.svg)](https://codecov.io/gh/<your-github-username>/nim-schedules)
+
 A Nim scheduler library that lets you kick off jobs at regular intervals.
 
-Read the [documentation](https://www.soasme.com/nim-schedules/schedules.html).
+Read the [documentation](docs/schedules.html) (locally) or deploy it via GitHub Pages.
 
 Features:
 
@@ -94,30 +97,27 @@ Sometimes, you want to run the scheduler in parallel with other libraries.
 In this case, you can create your own scheduler by macro `scheduler` and
 start it later.
 
-Below is an example of co-exist jester and nim-schedules in one process.
+Below is an example showing how to run `nim-schedules` concurrently with the Prologue web framework in one process.
 
 ```nim
-import times, asyncdispatch, schedules, jester
+import times, asyncdispatch, schedules, prologue
 
 scheduler mySched:
   every(seconds=1, id="sync tick"):
     echo("sync tick, seconds=1 ", now())
 
-router myRouter:
-  get "/":
-    resp "It's alive!"
+proc hello*(ctx: Context) {.async.} =
+  resp "<h1>Hello, Prologue! It's alive!</h1>"
 
-proc main():
-  # start schedules
+proc main() =
+  # Start the scheduler in the background of the async event loop
   asyncCheck mySched.start()
 
-  # start jester
-  let port = paramStr(1).parseInt().Port
-  let settings = newSettings(port=port)
-  var jester = initJester(myrouter, settings=settings)
-
-  # run
-  jester.serve()
+  # Set up and run the Prologue web application
+  let settings = prologue.newSettings()
+  var app = newApp(settings = settings)
+  app.addRoute("/", hello)
+  app.run()
 
 when isMainModule:
   main()
@@ -153,11 +153,51 @@ you can set startTime only, or set endTime only.
 
 Released:
 
+* v0.3.0, 8 Jul, 2026, Upgrade to Nim 2.2.10, resolve warnings, fix weekday index/last bugs, expand tests, and add CI coverage.
 * v0.2.0, 22 Jul, 2021, New feature: cron.
 * v0.1.2, 8 Jul, 2021, Bugfix: the first job schedule should be after startTime.
 * v0.1.1, update metadata.
 * v0.1.0, initial release.
 
+## Development
+
+### Running Tests
+
+To run the automated unit tests:
+
+```bash
+nimble test
+```
+
+### Code Coverage
+
+To run the tests with code coverage instrumentation:
+
+```bash
+nimble coverage
+```
+
+This will run all tests and compile intermediate C files in `nimcache/`. If you have `lcov` and `genhtml` installed, you can generate an HTML coverage report:
+
+```bash
+lcov --ignore-errors inconsistent --capture --directory nimcache --output-file coverage.info
+lcov --ignore-errors inconsistent --remove coverage.info '*/lib/*' --output-file coverage.info
+genhtml --ignore-errors range --filter missing coverage.info --output-directory coverage_html
+```
+
+Open `coverage_html/index.html` in your browser to view the coverage report.
+
+### Documentation
+
+To generate the HTML documentation locally:
+
+```bash
+nimble docs
+```
+
+This compiles all docstrings in the codebase and outputs the generated files directly into the `docs/` folder. You can open `docs/schedules.html` in your browser to read the generated docs.
+
 ## License
 
 Nim-schedules is based on MIT license.
+

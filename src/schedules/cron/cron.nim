@@ -207,17 +207,61 @@ proc ceil(dt: DateTime): DateTime =
     result += initTimeInterval(seconds=(60 - dt.second))
 
 
-proc initDateTime(values: ref Table[FieldKind, int]): DateTime =
-  initDateTime(
-    MonthdayRange(values[fkDayOfMonth]),
-    Month(values[fkMonth]),
-    values[fkYear],
-    values[fkHour],
-    values[fkMinute],
-    values[fkSecond],
-  )
+
+proc isMonthdayBased(expr: Expr): bool =
+  case expr.kind
+  of ekIndex, ekLastN: true
+  of ekSeq:
+    for sub in expr.exprs:
+      if isMonthdayBased(sub): return true
+    false
+  else: false
+
+proc getMatchMonthday(expr: Expr, month: Month, year: int): int =
+  if expr.kind == ekIndex:
+    var firstDayForIndex = expr.indexer - ord(getDayOfWeek(1, month, year))
+    if firstDayForIndex <= 0:
+      firstDayForIndex += 7
+    return firstDayForIndex + (expr.index-1) * 7
+  elif expr.kind == ekLastN:
+    let daysInMonth = getDaysInMonth(month, year)
+    let lastDayWeekday = ord(getDayOfWeek(daysInMonth, month, year)) + 1
+    var diff = lastDayWeekday - expr.last
+    if diff < 0:
+      diff += 7
+    return daysInMonth - diff
+  else:
+    return -1
+
+proc getMonthdayBasedOffset(expr: Expr, dt: DateTime): int =
+  case expr.kind
+  of ekIndex, ekLastN:
+    let d = getMatchMonthday(expr, dt.month, dt.year)
+    if d >= dt.monthday and d <= getDaysInMonth(dt.month, dt.year):
+      return d - dt.monthday
+    else:
+      var nextMonth = dt.month
+      var nextYear = dt.year
+      if nextMonth == mDec:
+        nextMonth = mJan
+        nextYear += 1
+      else:
+        nextMonth = Month(int(nextMonth) + 1)
+      let dNext = getMatchMonthday(expr, nextMonth, nextYear)
+      return (getDaysInMonth(dt.month, dt.year) - dt.monthday) + dNext
+  of ekSeq:
+    var minOffset = int.high
+    for sub in expr.exprs:
+      let offset = getMonthdayBasedOffset(sub, dt)
+      if offset < minOffset:
+        minOffset = offset
+    return minOffset
+  else:
+    return 0
 
 proc getInterval(cron: Cron, kind: FieldKind, dt: DateTime): int =
+  if kind == fkDayOfWeek and cron.fields[fkDayOfWeek].expr.isMonthdayBased():
+    return cron.fields[fkDayOfWeek].expr.getMonthdayBasedOffset(dt)
   let someNext = cron.fields[kind].getNext(dt)
   result = someNext.get - cron.fields[kind].getValue(dt)
   if result < 0:
@@ -225,6 +269,7 @@ proc getInterval(cron: Cron, kind: FieldKind, dt: DateTime): int =
       cron.fields[kind].maxValue(dt) -
       cron.fields[kind].minValue(dt) + 1
     )
+
 
 proc getNext*(cron: Cron, dt: DateTime): Option[DateTime] =
   # Given a cron object and a datetime, calculate the next fire time.
